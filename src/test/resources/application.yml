@@ -1,0 +1,17 @@
+server:
+  port: 8081
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: guest
+    password: guest
+
+location:
+  ffmpeg: /usr/bin/ffmpeg
+  video:
+    uploadPath: classpath:static/video/test-01.MP4
