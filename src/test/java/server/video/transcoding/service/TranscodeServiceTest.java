@@ -6,8 +6,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import server.video.transcoding.service.message.TransVideoFileDto;
-import server.video.transcoding.service.message.TransVideoMetaDataDto;
+import server.video.transcoding.service.dto.TransVideoFileDto;
+import server.video.transcoding.service.dto.TransVideoMeta;
+import server.video.transcoding.service.dto.TransVideoMetaDataDto;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -28,6 +29,7 @@ class TranscodeServiceTest {
 
     private String videoFilePath;
     private String transFilePath;
+    private final String SRC_PATH = "/home/koseyun/projects/spring/transcoding/src/test/resources/static/video/test-01.MP4";
 
     @BeforeEach
     void init() {
@@ -46,33 +48,17 @@ class TranscodeServiceTest {
         }
     }
 
-    @AfterEach
-    public void cleanup() throws Exception {
-        String path = "";
-        String[] filePaths = videoFilePath.split("/");
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < filePaths.length - 1; i++) {
-            if (i != filePaths.length - 2) sb.append(filePaths[i]).append("/");
-            else sb.append(filePaths[i]);
-        }
-        path = sb.toString();
-        System.out.println("delete Path = " + path);
-
-        Path directory = Paths.get(path);
-        if (Files.exists(directory)) {
-            Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    Files.delete(file);
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                    Files.delete(dir);
-                    return FileVisitResult.CONTINUE;
-                }
-            });
+    private void deleteFile(String path) {
+        Path fileToDeletePath = Paths.get(path);
+        try {
+            if (Files.exists(fileToDeletePath)) { //파일이 존재하는지 확인
+                Files.delete(fileToDeletePath); //파일 삭제
+                System.out.println("File deleted successfully");
+            } else {
+                System.out.println("File doesn't exist");
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
         }
     }
 
@@ -80,12 +66,27 @@ class TranscodeServiceTest {
     @DisplayName("포맷팅 test")
     public void video_test() throws Exception {
         //given
+        System.out.println("videoFilePath = " + videoFilePath + ", transFilePath = " + transFilePath);
+        if (videoFilePath == null) {
+            videoFilePath = SRC_PATH;
+            transFilePath = "/home/koseyun/projects/spring/transcoding/build/resources/test/static";
+        }
+
         TransVideoFileDto transVideoFileDto = new TransVideoFileDto(videoFilePath, transFilePath);
 
         //when
-        List<TransVideoMetaDataDto> transcodePath = transcodeService.transcode(transVideoFileDto);
+        TransVideoMetaDataDto metaDataDto = transcodeService.transcode(transVideoFileDto);
 
         //then
-        assertThat(transcodePath.isEmpty()).isFalse();
+        assertThat(metaDataDto.getMetas().isEmpty()).isFalse();
+        for (TransVideoMeta dataDto : metaDataDto.getMetas()) {
+            System.out.printf("Path = %s, bitrate = %s, format = %s%n",
+                    dataDto.getTransVideoFilePaths(),
+                    dataDto.getBitrate(),
+                    dataDto.getFormat());
+
+            deleteFile(dataDto.getTransVideoFilePaths());
+        }
+        System.out.println("duration = " + metaDataDto.getDuration());
     }
 }

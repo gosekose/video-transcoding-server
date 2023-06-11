@@ -1,4 +1,4 @@
-package server.video.transcoding.service.message;
+package server.video.transcoding.service.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

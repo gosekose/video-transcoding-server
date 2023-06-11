@@ -3,13 +3,16 @@ package server.video.transcoding.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import server.video.transcoding.service.message.TransVideoMetaDataDto;
-import server.video.transcoding.service.message.TransVideoFileDto;
+import server.video.transcoding.service.dto.TransVideoMeta;
+import server.video.transcoding.service.dto.TransVideoMetaDataDto;
+import server.video.transcoding.service.dto.TransVideoFileDto;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -31,19 +34,56 @@ public class TranscodeService {
             "240k"
     };
 
-    public List<TransVideoMetaDataDto> transcode(TransVideoFileDto transVideoFileDto) {
-        List<TransVideoMetaDataDto> metaDataDtos = new ArrayList<>();
+    public TransVideoMetaDataDto transcode(TransVideoFileDto transVideoFileDto) {
+        List<TransVideoMeta> metas = new ArrayList<>();
         log.info("filePath = {}, savePath = {}", transVideoFileDto.getUploadFilePath(), transVideoFileDto.getTranscodingFilePath());
 
+        String originalFilePath = transVideoFileDto.getUploadFilePath();
+        String originalDuration = null;
+        String originalBitrate = null;
+
         // 원본 파일의 경로, bitrate, format 저장
-//        metaDataDtos.add(transVideoFileDto.getUploadFilePath());
+        String command = String.format("%s -i %s", ffmpeg, originalFilePath);
+        try {
+            Process process = Runtime.getRuntime().exec(command);
+            try (InputStreamReader inputStreamReader = new InputStreamReader(process.getErrorStream());
+                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+                 String line;
+                 log.info("line start");
+                Pattern durationPattern = Pattern.compile("Duration: ([^,]*),");
+                Pattern bitratePattern = Pattern.compile("bitrate: ([^ ]*) kb/s");
+
+                while ((line = bufferedReader.readLine()) != null) {
+                    log.info(line);
+
+                    Matcher durationMatcher = durationPattern.matcher(line);
+                    Matcher bitrateMatcher = bitratePattern.matcher(line);
+
+                    if (durationMatcher.find()) {
+                        originalDuration = durationMatcher.group(1);
+                    }
+
+                    if (bitrateMatcher.find()) {
+                        originalBitrate = bitrateMatcher.group(1);
+                    }
+                 }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        String[] formats = originalFilePath.split("\\.");
+        metas.add(TransVideoMeta.builder()
+                .transVideoFilePaths(originalFilePath)
+                .bitrate(originalBitrate)
+                .format(formats[formats.length - 1])
+                .build());
 
         for (String format : formatList) {
             for (String bitrate : bitrateList) {
                 String transPath = transVideoFileDto.getTranscodingFilePath() + "_" + bitrate;
 
                 // ffmpeg -i 파일명 -vf 변환 비트레이트 변환 위치.포멧
-                String command = String.format("%s -i %s -b:v %s %s.%s",
+                command = String.format("%s -i %s -b:v %s %s.%s",
                         ffmpeg,
                         transVideoFileDto.getUploadFilePath(),
                         bitrate,
@@ -60,16 +100,16 @@ public class TranscodeService {
 
                         String line;
                         while ((line = bufferedReader.readLine()) != null) {
-                            log.info("stream = {}", line);
+                            log.info(line);
                         }
 
                         if (process.waitFor() != 0) { // 0이 아니라면 잘못된 변환
                             log.error("error = {}", process.exitValue());
                         }
 
-                        metaDataDtos.add(TransVideoMetaDataDto
+                        metas.add(TransVideoMeta
                                 .builder()
-                                .transVideoFilePaths(transPath)
+                                .transVideoFilePaths(transPath + "." + format)
                                 .bitrate(bitrate)
                                 .format(format)
                                 .build());
@@ -80,7 +120,7 @@ public class TranscodeService {
             }
         }
 
-        return metaDataDtos;
+        return TransVideoMetaDataDto.builder().metas(metas).duration(originalDuration).build();
     }
 
 
