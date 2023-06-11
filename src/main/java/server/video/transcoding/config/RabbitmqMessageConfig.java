@@ -52,4 +52,22 @@ public class RabbitmqMessageConfig {
             @Qualifier(TRANSCODE_FINISH_QUEUE) Queue transcodeVideoQueue) {
         return BindingBuilder.bind(transcodeVideoQueue).to(transcodeVideoExchange);
     }
+
+    /**
+     * 트랜스코드를 요청한 서버로 성공 여부에 대한 상태 알림
+     */
+    @Qualifier(TRANSCODE_SUCCESS_STATUS_QUEUE)
+    @Bean
+    public Queue transcodeSuccessStatusQueue() {return new Queue(TRANSCODE_SUCCESS_STATUS_QUEUE);}
+
+    @Qualifier(TRANSCODE_SUCCESS_STATUS_EXCHANGE)
+    @Bean
+    public FanoutExchange transcodeSuccessStatusExchange() { return new FanoutExchange(TRANSCODE_FINISH_EXCHANGE);}
+
+    @Bean
+    public Binding transcodeSuccessStatusBinding(
+            @Qualifier(TRANSCODE_SUCCESS_STATUS_EXCHANGE) FanoutExchange transcodeVideoExchange,
+            @Qualifier(TRANSCODE_SUCCESS_STATUS_QUEUE) Queue transcodeVideoQueue) {
+        return BindingBuilder.bind(transcodeVideoQueue).to(transcodeVideoExchange);
+    }
 }

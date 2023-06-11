@@ -3,7 +3,7 @@ package server.video.transcoding.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import server.video.transcoding.service.message.VideoFileMessage;
+import server.video.transcoding.service.message.TransVideoFileMessage;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -28,18 +28,18 @@ public class TranscodeService {
             "240k"
     };
 
-    public void transcode(VideoFileMessage videoFileMessage) {
+    public void transcode(TransVideoFileMessage transVideoFileMessage) {
 
-        log.info("filePath = {}, savePath = {}", videoFileMessage.getUploadFilePath(), videoFileMessage.getTranscodingFilePath());
+        log.info("filePath = {}, savePath = {}", transVideoFileMessage.getUploadFilePath(), transVideoFileMessage.getTranscodingFilePath());
         for (String format : formatList) {
             for (String bitrate : bitrateList) {
 
                 // ffmpeg -i 파일명 -vf 변환 비트레이트 변환 위치.포멧
                 String command = String.format("%s -i %s -b:v %s %s.%s",
                         ffmpeg,
-                        videoFileMessage.getUploadFilePath(),
+                        transVideoFileMessage.getUploadFilePath(),
                         bitrate,
-                        videoFileMessage.getTranscodingFilePath() + "_" + bitrate,
+                        transVideoFileMessage.getTranscodingFilePath() + "_" + bitrate,
                         format
                 );
 

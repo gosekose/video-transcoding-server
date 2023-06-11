@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class VideoFileMessage {
+public class TransVideoFileMessage {
     private String uploadFilePath;
     private String transcodingFilePath;
 }

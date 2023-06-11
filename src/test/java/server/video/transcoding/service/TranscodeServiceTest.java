@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import server.video.transcoding.service.message.VideoFileMessage;
+import server.video.transcoding.service.message.TransVideoFileMessage;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -76,10 +76,10 @@ class TranscodeServiceTest {
     @DisplayName("포맷팅 test")
     public void video_test() throws Exception {
         //given
-        VideoFileMessage videoFileMessage = new VideoFileMessage(videoFilePath, transFilePath);
+        TransVideoFileMessage transVideoFileMessage = new TransVideoFileMessage(videoFilePath, transFilePath);
 
         //when
-        transcodeService.transcode(videoFileMessage);
+        transcodeService.transcode(transVideoFileMessage);
         //then
     }
 }
