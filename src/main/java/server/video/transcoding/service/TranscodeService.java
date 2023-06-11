@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import server.video.transcoding.service.dto.TransVideoMeta;
-import server.video.transcoding.service.dto.TransVideoMetaDataDto;
+import server.video.transcoding.service.dto.TransVideoMetadataDto;
 import server.video.transcoding.service.dto.TransVideoFileDto;
 
 import java.io.BufferedReader;
@@ -34,7 +34,7 @@ public class TranscodeService {
             "240k"
     };
 
-    public TransVideoMetaDataDto transcode(TransVideoFileDto transVideoFileDto) {
+    public TransVideoMetadataDto transcode(TransVideoFileDto transVideoFileDto) {
         List<TransVideoMeta> metas = new ArrayList<>();
         log.info("filePath = {}, savePath = {}", transVideoFileDto.getUploadFilePath(), transVideoFileDto.getTranscodingFilePath());
 
@@ -114,7 +114,7 @@ public class TranscodeService {
             }
         }
 
-        return TransVideoMetaDataDto.builder().metas(metas).duration(originalDuration).build();
+        return TransVideoMetadataDto.builder().metas(metas).duration(originalDuration).build();
     }
 
 

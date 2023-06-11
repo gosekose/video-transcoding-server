@@ -7,13 +7,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import server.video.transcoding.service.dto.TransVideoFileDto;
-import server.video.transcoding.service.dto.TransVideoMeta;
-import server.video.transcoding.service.dto.TransVideoMetaDataDto;
+import server.video.transcoding.service.dto.TransVideoMetadataDto;
 
 import java.io.IOException;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -75,7 +72,7 @@ class TranscodeServiceTest {
         TransVideoFileDto transVideoFileDto = new TransVideoFileDto(videoFilePath, transFilePath);
 
         //when
-        TransVideoMetaDataDto metaDataDto = transcodeService.transcode(transVideoFileDto);
+        TransVideoMetadataDto metaDataDto = transcodeService.transcode(transVideoFileDto);
 
         //then
         assertThat(metaDataDto.getMetas().isEmpty()).isFalse();
