@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
 
 @Slf4j
 @Service
-public class VideoTranscodingService {
+public class TranscodeService {
 
     /**
      * ffmpeg 소프트웨어 실행 파일 위치
@@ -20,7 +20,7 @@ public class VideoTranscodingService {
 
 
     private static final String[] formatList = {
-            "mp4", "mkv"
+            "mp4"
     };
 
     private static final String[] bitrateList = {

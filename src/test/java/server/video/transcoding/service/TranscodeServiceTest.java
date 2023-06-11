@@ -13,9 +13,10 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 
 @SpringBootTest
-class VideoTranscodingServiceTest {
+class TranscodeServiceTest {
 
-    @Autowired VideoTranscodingService videoTranscodingService;
+    @Autowired
+    TranscodeService transcodeService;
     @Autowired ResourceLoader resourceLoader; // 테스트 파일 경로를 가져오기
 
     @Value("${location.video.uploadPath}")
@@ -78,7 +79,7 @@ class VideoTranscodingServiceTest {
         VideoFileMessage videoFileMessage = new VideoFileMessage(videoFilePath, transFilePath);
 
         //when
-        videoTranscodingService.transcode(videoFileMessage);
+        transcodeService.transcode(videoFileMessage);
         //then
     }
 }
