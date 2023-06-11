@@ -6,11 +6,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import server.video.transcoding.service.message.TransVideoFileMessage;
+import server.video.transcoding.service.message.TransVideoFileDto;
+import server.video.transcoding.service.message.TransVideoMetaDataDto;
 
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 class TranscodeServiceTest {
@@ -76,10 +80,12 @@ class TranscodeServiceTest {
     @DisplayName("포맷팅 test")
     public void video_test() throws Exception {
         //given
-        TransVideoFileMessage transVideoFileMessage = new TransVideoFileMessage(videoFilePath, transFilePath);
+        TransVideoFileDto transVideoFileDto = new TransVideoFileDto(videoFilePath, transFilePath);
 
         //when
-        transcodeService.transcode(transVideoFileMessage);
+        List<TransVideoMetaDataDto> transcodePath = transcodeService.transcode(transVideoFileDto);
+
         //then
+        assertThat(transcodePath.isEmpty()).isFalse();
     }
 }

@@ -3,10 +3,13 @@ package server.video.transcoding.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import server.video.transcoding.service.message.TransVideoFileMessage;
+import server.video.transcoding.service.message.TransVideoMetaDataDto;
+import server.video.transcoding.service.message.TransVideoFileDto;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -28,18 +31,23 @@ public class TranscodeService {
             "240k"
     };
 
-    public void transcode(TransVideoFileMessage transVideoFileMessage) {
+    public List<TransVideoMetaDataDto> transcode(TransVideoFileDto transVideoFileDto) {
+        List<TransVideoMetaDataDto> metaDataDtos = new ArrayList<>();
+        log.info("filePath = {}, savePath = {}", transVideoFileDto.getUploadFilePath(), transVideoFileDto.getTranscodingFilePath());
 
-        log.info("filePath = {}, savePath = {}", transVideoFileMessage.getUploadFilePath(), transVideoFileMessage.getTranscodingFilePath());
+        // 원본 파일의 경로, bitrate, format 저장
+//        metaDataDtos.add(transVideoFileDto.getUploadFilePath());
+
         for (String format : formatList) {
             for (String bitrate : bitrateList) {
+                String transPath = transVideoFileDto.getTranscodingFilePath() + "_" + bitrate;
 
                 // ffmpeg -i 파일명 -vf 변환 비트레이트 변환 위치.포멧
                 String command = String.format("%s -i %s -b:v %s %s.%s",
                         ffmpeg,
-                        transVideoFileMessage.getUploadFilePath(),
+                        transVideoFileDto.getUploadFilePath(),
                         bitrate,
-                        transVideoFileMessage.getTranscodingFilePath() + "_" + bitrate,
+                        transPath,
                         format
                 );
 
@@ -58,12 +66,21 @@ public class TranscodeService {
                         if (process.waitFor() != 0) { // 0이 아니라면 잘못된 변환
                             log.error("error = {}", process.exitValue());
                         }
+
+                        metaDataDtos.add(TransVideoMetaDataDto
+                                .builder()
+                                .transVideoFilePaths(transPath)
+                                .bitrate(bitrate)
+                                .format(format)
+                                .build());
                     }
                 } catch (Exception e) {
                     log.error(e.getMessage());
                 }
             }
         }
+
+        return metaDataDtos;
     }
 
 
