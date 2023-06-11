@@ -46,27 +46,21 @@ public class TranscodeService {
         String command = String.format("%s -i %s", ffmpeg, originalFilePath);
         try {
             Process process = Runtime.getRuntime().exec(command);
-            try (InputStreamReader inputStreamReader = new InputStreamReader(process.getErrorStream());
-                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
-                 String line;
-                 log.info("line start");
-                Pattern durationPattern = Pattern.compile("Duration: ([^,]*),");
-                Pattern bitratePattern = Pattern.compile("bitrate: ([^ ]*) kb/s");
+            try (
+                    InputStreamReader inputStreamReader = new InputStreamReader(process.getErrorStream());
+                    BufferedReader bufferedReader = new BufferedReader(inputStreamReader)
+            ) {
+                    Pattern durationPattern = Pattern.compile("Duration: ([^,]*),");
+                    Pattern bitratePattern = Pattern.compile("bitrate: ([^ ]*) kb/s");
 
-                while ((line = bufferedReader.readLine()) != null) {
-                    log.info(line);
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                         Matcher durationMatcher = durationPattern.matcher(line);
+                         Matcher bitrateMatcher = bitratePattern.matcher(line);
 
-                    Matcher durationMatcher = durationPattern.matcher(line);
-                    Matcher bitrateMatcher = bitratePattern.matcher(line);
-
-                    if (durationMatcher.find()) {
-                        originalDuration = durationMatcher.group(1);
+                         if (durationMatcher.find()) originalDuration = durationMatcher.group(1);
+                         if (bitrateMatcher.find()) originalBitrate = bitrateMatcher.group(1);
                     }
-
-                    if (bitrateMatcher.find()) {
-                        originalBitrate = bitrateMatcher.group(1);
-                    }
-                 }
             }
         } catch (Exception e) {
             log.error(e.getMessage());

@@ -79,13 +79,13 @@ class TranscodeServiceTest {
 
         //then
         assertThat(metaDataDto.getMetas().isEmpty()).isFalse();
-        for (TransVideoMeta dataDto : metaDataDto.getMetas()) {
+        for (int i = 1; i < metaDataDto.getMetas().size(); i++) {
             System.out.printf("Path = %s, bitrate = %s, format = %s%n",
-                    dataDto.getTransVideoFilePaths(),
-                    dataDto.getBitrate(),
-                    dataDto.getFormat());
+                    metaDataDto.getMetas().get(i).getTransVideoFilePaths(),
+                    metaDataDto.getMetas().get(i).getBitrate(),
+                    metaDataDto.getMetas().get(i).getFormat());
 
-            deleteFile(dataDto.getTransVideoFilePaths());
+            deleteFile(metaDataDto.getMetas().get(i).getTransVideoFilePaths());
         }
         System.out.println("duration = " + metaDataDto.getDuration());
     }
