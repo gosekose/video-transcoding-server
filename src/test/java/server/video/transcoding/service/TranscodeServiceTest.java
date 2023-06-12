@@ -6,8 +6,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import server.video.transcoding.service.dto.TransVideoFileDto;
-import server.video.transcoding.service.dto.TransVideoMetadataDto;
+import server.video.transcoding.service.dto.InfoMetadata;
+import server.video.transcoding.service.message.MetadataDtoFromApiServer;
+import server.video.transcoding.service.message.TransMetadataToTranscodingHandlerServer;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -63,26 +64,27 @@ class TranscodeServiceTest {
     @DisplayName("포맷팅 test")
     public void video_test() throws Exception {
         //given
-        System.out.println("videoFilePath = " + videoFilePath + ", transFilePath = " + transFilePath);
+        InfoMetadata infoMetadata = new InfoMetadata(3L);
         if (videoFilePath == null) {
             videoFilePath = SRC_PATH;
             transFilePath = "/home/koseyun/projects/spring/transcoding/build/resources/test/static";
         }
 
-        TransVideoFileDto transVideoFileDto = new TransVideoFileDto(videoFilePath, transFilePath);
+        MetadataDtoFromApiServer metadataDtoFromApiServer =
+                new MetadataDtoFromApiServer(infoMetadata, videoFilePath, transFilePath);
 
         //when
-        TransVideoMetadataDto metaDataDto = transcodeService.transcode(transVideoFileDto);
+        TransMetadataToTranscodingHandlerServer metaDataDto = transcodeService.transcode(metadataDtoFromApiServer);
 
         //then
-        assertThat(metaDataDto.getMetas().isEmpty()).isFalse();
-        for (int i = 1; i < metaDataDto.getMetas().size(); i++) {
+        assertThat(metaDataDto.getTransVideoMetadataList().isEmpty()).isFalse();
+        for (int i = 1; i < metaDataDto.getTransVideoMetadataList().size(); i++) {
             System.out.printf("Path = %s, bitrate = %s, format = %s%n",
-                    metaDataDto.getMetas().get(i).getTransVideoFilePaths(),
-                    metaDataDto.getMetas().get(i).getBitrate(),
-                    metaDataDto.getMetas().get(i).getFormat());
+                    metaDataDto.getTransVideoFilePath(i),
+                    metaDataDto.getBitrate(i),
+                    metaDataDto.getFormat(i));
 
-            deleteFile(metaDataDto.getMetas().get(i).getTransVideoFilePaths());
+            deleteFile(metaDataDto.getTransVideoFilePath(i));
         }
         System.out.println("duration = " + metaDataDto.getDuration());
     }

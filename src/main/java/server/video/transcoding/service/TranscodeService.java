@@ -3,14 +3,11 @@ package server.video.transcoding.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import server.video.transcoding.service.dto.TransVideoMeta;
-import server.video.transcoding.service.dto.TransVideoMetadataDto;
-import server.video.transcoding.service.dto.TransVideoFileDto;
+import server.video.transcoding.service.message.TransMetadataToTranscodingHandlerServer;
+import server.video.transcoding.service.message.MetadataDtoFromApiServer;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,11 +31,9 @@ public class TranscodeService {
             "240k"
     };
 
-    public TransVideoMetadataDto transcode(TransVideoFileDto transVideoFileDto) {
-        List<TransVideoMeta> metas = new ArrayList<>();
-        log.info("filePath = {}, savePath = {}", transVideoFileDto.getUploadFilePath(), transVideoFileDto.getTranscodingFilePath());
+    public TransMetadataToTranscodingHandlerServer transcode(MetadataDtoFromApiServer metadataDtoFromApiServer) {
 
-        String originalFilePath = transVideoFileDto.getUploadFilePath();
+        String originalFilePath = metadataDtoFromApiServer.getUploadFilePathInVideoMetadata();
         String originalDuration = null;
         String originalBitrate = null;
 
@@ -65,24 +60,20 @@ public class TranscodeService {
         } catch (Exception e) {
             log.error(e.getMessage());
         }
+        TransMetadataToTranscodingHandlerServer transMetadataToTranscodingHandlerServer = new TransMetadataToTranscodingHandlerServer(
+                metadataDtoFromApiServer.getInfoMetadata(), originalDuration);
+
         String[] formats = originalFilePath.split("\\.");
-        metas.add(TransVideoMeta.builder()
-                .transVideoFilePaths(originalFilePath)
-                .bitrate(originalBitrate)
-                .format(formats[formats.length - 1])
-                .build());
+        transMetadataToTranscodingHandlerServer.addMetadata(originalFilePath, originalBitrate, formats[formats.length - 1]);
 
         for (String format : formatList) {
             for (String bitrate : bitrateList) {
-                String transPath = transVideoFileDto.getTranscodingFilePath() + "_" + bitrate;
+                String transPath = metadataDtoFromApiServer.getTranscodingFilePathInVideoMetadata() + "_" + bitrate;
 
                 // ffmpeg -i 파일명 -vf 변환 비트레이트 변환 위치.포멧
                 command = String.format("%s -i %s -b:v %s %s.%s",
-                        ffmpeg,
-                        transVideoFileDto.getUploadFilePath(),
-                        bitrate,
-                        transPath,
-                        format
+                        ffmpeg, metadataDtoFromApiServer.getUploadFilePathInVideoMetadata(),
+                        bitrate, transPath, format
                 );
 
                 try {
@@ -97,16 +88,8 @@ public class TranscodeService {
                             log.info(line);
                         }
 
-                        if (process.waitFor() != 0) { // 0이 아니라면 잘못된 변환
-                            log.error("error = {}", process.exitValue());
-                        }
-
-                        metas.add(TransVideoMeta
-                                .builder()
-                                .transVideoFilePaths(transPath + "." + format)
-                                .bitrate(bitrate)
-                                .format(format)
-                                .build());
+                        if (process.waitFor() != 0) log.error("error = {}", process.exitValue());
+                        transMetadataToTranscodingHandlerServer.addMetadata(transPath + "." + format, bitrate, format);
                     }
                 } catch (Exception e) {
                     log.error(e.getMessage());
@@ -114,7 +97,7 @@ public class TranscodeService {
             }
         }
 
-        return TransVideoMetadataDto.builder().metas(metas).duration(originalDuration).build();
+        return transMetadataToTranscodingHandlerServer;
     }
 
 
