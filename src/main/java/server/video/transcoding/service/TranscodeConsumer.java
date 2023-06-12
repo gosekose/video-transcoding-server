@@ -7,9 +7,9 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import server.video.transcoding.service.dto.InfoMetadata;
-import server.video.transcoding.service.message.TransStatusResponseToApiServer;
-import server.video.transcoding.service.message.MetadataDtoFromApiServer;
-import server.video.transcoding.service.message.TransMetadataToTranscodingHandlerServer;
+import server.video.transcoding.service.message.TransStatusDto;
+import server.video.transcoding.service.message.MetadataDto;
+import server.video.transcoding.service.message.TransMetadataDto;
 
 import java.time.LocalDateTime;
 
@@ -36,15 +36,15 @@ public class TranscodeConsumer {
     }
 
     @RabbitListener(queues = "#{" + TRANSCODE_READY_QUEUE + ".name}")
-    public void transcodeAndSendMessage(MetadataDtoFromApiServer metadataDtoFromApiServer) {
+    public void transcodeAndSendMessage(MetadataDto metadataDto) {
         try {
-            TransMetadataToTranscodingHandlerServer message = transcodeService.transcode(metadataDtoFromApiServer);
+            TransMetadataDto message = transcodeService.transcode(metadataDto);
             sendMessageWithTransVideoPaths(message);
-            sendMessageWithSuccessStatus(metadataDtoFromApiServer.getInfoMetadata(), true);
+            sendMessageWithSuccessStatus(metadataDto.getInfoMetadata(), true);
 
         } catch (Exception e) {
             log.error(e.getMessage());
-            sendMessageWithSuccessStatus(metadataDtoFromApiServer.getInfoMetadata(), false);
+            sendMessageWithSuccessStatus(metadataDto.getInfoMetadata(), false);
         }
     }
 
@@ -54,7 +54,7 @@ public class TranscodeConsumer {
      */
     private void sendMessageWithSuccessStatus(InfoMetadata metadata, boolean status) {
         rabbitTemplate.convertAndSend(successStatusQueue.getName(),
-                TransStatusResponseToApiServer.builder()
+                TransStatusDto.builder()
                         .infoMetadata(metadata)
                 .status(status).finishTime(LocalDateTime.now()).build());
     }
@@ -62,7 +62,7 @@ public class TranscodeConsumer {
     /**
      *transcode를 성공하면 트랜스코딩을 완료한 content 메타 데이터 전달
      */
-    private void sendMessageWithTransVideoPaths(TransMetadataToTranscodingHandlerServer message) {
+    private void sendMessageWithTransVideoPaths(TransMetadataDto message) {
         rabbitTemplate.convertAndSend(finishQueue.getName(), message);
     }
 }

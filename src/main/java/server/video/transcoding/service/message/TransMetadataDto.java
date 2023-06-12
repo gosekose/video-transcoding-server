@@ -8,15 +8,23 @@ import server.video.transcoding.service.dto.InfoMetadata;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * From: Transcoding-Server
+ * To: Transcoding-Handler-Server
+
+ * infoMetadata: 동영상에 관한 제목 설명을 저장한 pk
+ * transVideoMetadataList: 변경한 동영상 포멧등이 담긴 동영상 메타 정보
+ * duration: 동영상 영상 길이
+ */
 @Getter
 @NoArgsConstructor
-public class TransMetadataToTranscodingHandlerServer {
+public class TransMetadataDto {
 
     private InfoMetadata infoMetadata;
     private List<TransVideoMetadata> transVideoMetadataList = new ArrayList<>();
     private String duration; // 지속 시간
 
-    public TransMetadataToTranscodingHandlerServer(InfoMetadata infoMetadata, String duration) {
+    public TransMetadataDto(InfoMetadata infoMetadata, String duration) {
         this.infoMetadata = infoMetadata;
         this.duration = duration;
     }

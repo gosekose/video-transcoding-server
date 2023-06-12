@@ -7,8 +7,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import server.video.transcoding.service.dto.InfoMetadata;
-import server.video.transcoding.service.message.MetadataDtoFromApiServer;
-import server.video.transcoding.service.message.TransMetadataToTranscodingHandlerServer;
+import server.video.transcoding.service.message.MetadataDto;
+import server.video.transcoding.service.message.TransMetadataDto;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -70,11 +70,11 @@ class TranscodeServiceTest {
             transFilePath = "/home/koseyun/projects/spring/transcoding/build/resources/test/static";
         }
 
-        MetadataDtoFromApiServer metadataDtoFromApiServer =
-                new MetadataDtoFromApiServer(infoMetadata, videoFilePath, transFilePath);
+        MetadataDto metadataDto =
+                new MetadataDto(infoMetadata, videoFilePath, transFilePath);
 
         //when
-        TransMetadataToTranscodingHandlerServer metaDataDto = transcodeService.transcode(metadataDtoFromApiServer);
+        TransMetadataDto metaDataDto = transcodeService.transcode(metadataDto);
 
         //then
         assertThat(metaDataDto.getTransVideoMetadataList().isEmpty()).isFalse();

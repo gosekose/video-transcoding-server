@@ -3,8 +3,8 @@ package server.video.transcoding.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import server.video.transcoding.service.message.TransMetadataToTranscodingHandlerServer;
-import server.video.transcoding.service.message.MetadataDtoFromApiServer;
+import server.video.transcoding.service.message.TransMetadataDto;
+import server.video.transcoding.service.message.MetadataDto;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -31,9 +31,9 @@ public class TranscodeService {
             "240k"
     };
 
-    public TransMetadataToTranscodingHandlerServer transcode(MetadataDtoFromApiServer metadataDtoFromApiServer) {
+    public TransMetadataDto transcode(MetadataDto metadataDto) {
 
-        String originalFilePath = metadataDtoFromApiServer.getUploadFilePathInVideoMetadata();
+        String originalFilePath = metadataDto.getUploadFilePathInVideoMetadata();
         String originalDuration = null;
         String originalBitrate = null;
 
@@ -60,19 +60,19 @@ public class TranscodeService {
         } catch (Exception e) {
             log.error(e.getMessage());
         }
-        TransMetadataToTranscodingHandlerServer transMetadataToTranscodingHandlerServer = new TransMetadataToTranscodingHandlerServer(
-                metadataDtoFromApiServer.getInfoMetadata(), originalDuration);
+        TransMetadataDto transMetadataDto = new TransMetadataDto(
+                metadataDto.getInfoMetadata(), originalDuration);
 
         String[] formats = originalFilePath.split("\\.");
-        transMetadataToTranscodingHandlerServer.addMetadata(originalFilePath, originalBitrate, formats[formats.length - 1]);
+        transMetadataDto.addMetadata(originalFilePath, originalBitrate, formats[formats.length - 1]);
 
         for (String format : formatList) {
             for (String bitrate : bitrateList) {
-                String transPath = metadataDtoFromApiServer.getTranscodingFilePathInVideoMetadata() + "_" + bitrate;
+                String transPath = metadataDto.getTranscodingFilePathInVideoMetadata() + "_" + bitrate;
 
                 // ffmpeg -i 파일명 -vf 변환 비트레이트 변환 위치.포멧
                 command = String.format("%s -i %s -b:v %s %s.%s",
-                        ffmpeg, metadataDtoFromApiServer.getUploadFilePathInVideoMetadata(),
+                        ffmpeg, metadataDto.getUploadFilePathInVideoMetadata(),
                         bitrate, transPath, format
                 );
 
@@ -89,7 +89,7 @@ public class TranscodeService {
                         }
 
                         if (process.waitFor() != 0) log.error("error = {}", process.exitValue());
-                        transMetadataToTranscodingHandlerServer.addMetadata(transPath + "." + format, bitrate, format);
+                        transMetadataDto.addMetadata(transPath + "." + format, bitrate, format);
                     }
                 } catch (Exception e) {
                     log.error(e.getMessage());
@@ -97,7 +97,7 @@ public class TranscodeService {
             }
         }
 
-        return transMetadataToTranscodingHandlerServer;
+        return transMetadataDto;
     }
 
 
