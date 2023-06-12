@@ -3,8 +3,8 @@ package server.video.transcoding.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import server.video.transcoding.service.message.TransMetadataDto;
-import server.video.transcoding.service.message.MetadataDto;
+import server.video.transcoding.service.dto.TransMetadataDto;
+import server.video.transcoding.service.dto.MetadataDto;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -61,7 +61,7 @@ public class TranscodeService {
             log.error(e.getMessage());
         }
         TransMetadataDto transMetadataDto = new TransMetadataDto(
-                metadataDto.getInfoMetadata(), originalDuration);
+                metadataDto.getInfoMetadataDto(), originalDuration);
 
         String[] formats = originalFilePath.split("\\.");
         transMetadataDto.addMetadata(originalFilePath, originalBitrate, formats[formats.length - 1]);

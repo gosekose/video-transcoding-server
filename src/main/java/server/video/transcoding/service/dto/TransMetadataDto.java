@@ -1,9 +1,9 @@
-package server.video.transcoding.service.message;
+package server.video.transcoding.service.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import server.video.transcoding.service.dto.InfoMetadata;
+import server.video.transcoding.service.dto.InfoMetadataDto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.List;
  * From: Transcoding-Server
  * To: Transcoding-Handler-Server
 
- * infoMetadata: 동영상에 관한 제목 설명을 저장한 pk
+ * infoMetadataDto: 동영상에 관한 제목 설명을 저장한 pk
  * transVideoMetadataList: 변경한 동영상 포멧등이 담긴 동영상 메타 정보
  * duration: 동영상 영상 길이
  */
@@ -20,12 +20,12 @@ import java.util.List;
 @NoArgsConstructor
 public class TransMetadataDto {
 
-    private InfoMetadata infoMetadata;
+    private InfoMetadataDto infoMetadataDto;
     private List<TransVideoMetadata> transVideoMetadataList = new ArrayList<>();
     private String duration; // 지속 시간
 
-    public TransMetadataDto(InfoMetadata infoMetadata, String duration) {
-        this.infoMetadata = infoMetadata;
+    public TransMetadataDto(InfoMetadataDto infoMetadataDto, String duration) {
+        this.infoMetadataDto = infoMetadataDto;
         this.duration = duration;
     }
 

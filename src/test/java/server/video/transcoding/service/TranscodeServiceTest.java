@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import server.video.transcoding.service.dto.InfoMetadata;
-import server.video.transcoding.service.message.MetadataDto;
-import server.video.transcoding.service.message.TransMetadataDto;
+import server.video.transcoding.service.dto.InfoMetadataDto;
+import server.video.transcoding.service.dto.MetadataDto;
+import server.video.transcoding.service.dto.TransMetadataDto;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -64,14 +64,14 @@ class TranscodeServiceTest {
     @DisplayName("포맷팅 test")
     public void video_test() throws Exception {
         //given
-        InfoMetadata infoMetadata = new InfoMetadata(3L);
+        InfoMetadataDto infoMetadataDto = new InfoMetadataDto(3L);
         if (videoFilePath == null) {
             videoFilePath = SRC_PATH;
             transFilePath = "/home/koseyun/projects/spring/transcoding/build/resources/test/static";
         }
 
         MetadataDto metadataDto =
-                new MetadataDto(infoMetadata, videoFilePath, transFilePath);
+                new MetadataDto(infoMetadataDto, videoFilePath, transFilePath);
 
         //when
         TransMetadataDto metaDataDto = transcodeService.transcode(metadataDto);

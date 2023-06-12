@@ -9,6 +9,6 @@ import java.io.Serializable;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class InfoMetadata implements Serializable {
+public class InfoMetadataDto implements Serializable {
     private Long infoMetadataId;
 }
