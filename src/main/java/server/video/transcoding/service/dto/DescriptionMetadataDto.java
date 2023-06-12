@@ -10,5 +10,5 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DescriptionMetadataDto implements Serializable {
-    private Long infoMetadataId;
+    private Long descriptionId;
 }
