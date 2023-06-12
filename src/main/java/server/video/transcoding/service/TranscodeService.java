@@ -61,7 +61,7 @@ public class TranscodeService {
             log.error(e.getMessage());
         }
         TransMetadataDto transMetadataDto = new TransMetadataDto(
-                metadataDto.getInfoMetadataDto(), originalDuration);
+                metadataDto.getDescriptionMetadataDto(), originalDuration);
 
         String[] formats = originalFilePath.split("\\.");
         transMetadataDto.addMetadata(originalFilePath, originalBitrate, formats[formats.length - 1]);

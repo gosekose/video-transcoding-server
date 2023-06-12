@@ -6,7 +6,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import server.video.transcoding.service.dto.InfoMetadataDto;
+import server.video.transcoding.service.dto.DescriptionMetadataDto;
 import server.video.transcoding.service.dto.TransStatusDto;
 import server.video.transcoding.service.dto.MetadataDto;
 import server.video.transcoding.service.dto.TransMetadataDto;
@@ -40,11 +40,11 @@ public class TranscodeConsumer {
         try {
             TransMetadataDto message = transcodeService.transcode(metadataDto);
             sendMessageWithTransVideoPaths(message);
-            sendMessageWithSuccessStatus(metadataDto.getInfoMetadataDto(), true);
+            sendMessageWithSuccessStatus(metadataDto.getDescriptionMetadataDto(), true);
 
         } catch (Exception e) {
             log.error(e.getMessage());
-            sendMessageWithSuccessStatus(metadataDto.getInfoMetadataDto(), false);
+            sendMessageWithSuccessStatus(metadataDto.getDescriptionMetadataDto(), false);
         }
     }
 
@@ -52,10 +52,10 @@ public class TranscodeConsumer {
     /**
      * transcode를 요청한 api 서버로 성공 여부 메세지 전달
      */
-    private void sendMessageWithSuccessStatus(InfoMetadataDto metadata, boolean status) {
+    private void sendMessageWithSuccessStatus(DescriptionMetadataDto metadata, boolean status) {
         rabbitTemplate.convertAndSend(successStatusQueue.getName(),
                 TransStatusDto.builder()
-                        .infoMetadata(metadata)
+                        .descriptionMetadataDto(metadata)
                 .status(status).finishTime(LocalDateTime.now()).build());
     }
 
